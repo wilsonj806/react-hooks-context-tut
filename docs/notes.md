@@ -70,6 +70,8 @@ To update our component we can add the below:
 
 ### The useEffect method
 
+- [React docs reference](https://reactjs.org/docs/hooks-reference.html#useeffect)
+
 First things first, what does `useEffect()` do? `useEffect()` tells the React component that it needs to do stuff after the component renders.
 
 `useEffect()` is called after performing DOM updates, so component lifecycle-wise, we go from the below:
@@ -107,4 +109,24 @@ See below for a contrived example of `useEffects`
     }
   ```
 
+We can also add a second argument to the `useEffect()` method. This is functionally the same as using `prevProps` in `componentDidUpdate()` as seen below:
+  ```js
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
 
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      // clean up and tear down our subscription to the Chat API
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  }, [props.friend.id]); // Only re-subscribe if props.friend.id changes
+  ```
+- note that we actually pass in an array as the second argument
+  - this lets us watch as many variables as needed
+  - we can also run an effect and clean it up once by passing in an empty array as an argument(see the api reference on `useEffect` for more)
+
+In addition, `useEffect()` can also return a function as seen above. This function runs when the component unmounts and serves as the teardown for the effect.
+
+The other thing that distinguishes `useEffect()` from other lifecycle methods is that you can call `useEffect()` multiple times in a component to handle different parts of your state
