@@ -1,15 +1,15 @@
-import React from 'react';
-import './App.css';
-import Example from './examples/Example';
-import Cart from './examples/Cart';
+import React, { memo } from 'react';
+import Layout from './components/Layout';
 
-function App() {
+
+const App = memo(() => {
   return (
     <div className="App">
-      <Example/>
-      <Cart/>
+      <Layout>
+
+      </Layout>
     </div>
   );
-}
+})
 
 export default App;
