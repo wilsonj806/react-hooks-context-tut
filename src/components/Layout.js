@@ -10,10 +10,12 @@ import { AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
  *  - it's an optimization available to pure components
  * General overview on components:
  *  - Appbar and Paper are defined in Material UI as Surface components
- *  - AppBar gives content and actions related to the current screen(used for branding, screen titles, navigation and actions)
+ *  - AppBar gives content and actions related to the current screen(used for branding, screen
+ *     titles, navigation and actions)
  *  - Paper acts as a background for your app that you can build ontop of
  *    - tries to mimic paper's ability to be re-sized, shuffled, and bound together
- *  - Typography is Material UI's component for centralizing typographic components(p, h1-h6, etc)
+ *  - Typography is Material UI's component for centralizing typographic components(p,
+ *     h1-h6, etc)
  */
 const Layout = memo(props => (
   <Paper
