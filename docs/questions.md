@@ -13,4 +13,18 @@
 
 - How long is lunch(if not covered)?
 - Microwave(if not covered)?
-- 
+-
+
+## notes in general
+
+Develop an api to connect to the supplier and streamline the process.
+
+Small suppliers with ultra custom stuff
+
+two way service  client <== Showroom API ==> supplier
+
+## Git flow
+don't commit:
+- broken code
+- unfinished code
+don't PR unless it's done

@@ -1,6 +1,8 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
+import Switch from '@material-ui/core/Switch';
 
+import { ThemeContext }from '../contexts/theme-context';
 /**
  * Notes
  * ==============================================
@@ -17,18 +19,40 @@ import { AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
  *  - Typography is Material UI's component for centralizing typographic components(p,
  *     h1-h6, etc)
  */
-const Layout = memo(props => (
-  <Paper
-    elevation={0}
-    style={{ padding: 0, margin: 0, backgroundColor: '#fafafa'}}
-  >
-    <AppBar color="primary" position="static" style={{ height: 64 }}>
-      <Toolbar style={{ height: 64 }}>
-        <Typography color="inherit">TODO App</Typography>
-      </Toolbar>
-    </AppBar>
-    { props.children }
-  </Paper>
-));
+
+
+
+const Layout = memo(props => {
+  const value = useContext(ThemeContext);
+  const { isLight, themeToUse, toggleHandler } = value;
+  const styles = Object.assign({}, { height: 64 }, themeToUse.styles);
+  return (
+    <Paper
+      elevation={0}
+      style={{ padding: 0, margin: 0, backgroundColor: '#fafafa'}}
+    >
+      <AppBar
+        color="primary"
+        position="static"
+        style={styles}
+        classes={{
+          root: themeToUse.color
+        }}
+      >
+        <Toolbar
+          style={{ height: 64 }}
+        >
+          <Typography color="inherit">TODO App</Typography>
+          <Switch
+            color={ props.color }
+            checked={ isLight }
+            onChange={ toggleHandler }
+          />
+        </Toolbar>
+      </AppBar>
+      { props.children }
+    </Paper>
+  )
+});
 
 export default Layout;
