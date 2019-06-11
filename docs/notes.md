@@ -130,3 +130,195 @@ We can also add a second argument to the `useEffect()` method. This is functiona
 In addition, `useEffect()` can also return a function as seen above. This function runs when the component unmounts and serves as the teardown for the effect.
 
 The other thing that distinguishes `useEffect()` from other lifecycle methods is that you can call `useEffect()` multiple times in a component to handle different parts of your state
+
+### The useReducer method
+
+This looks like Redux because it basically is Redux(facebook hired the guy who made Redux).
+
+Syntax below:
+```js
+  const reducerFn = (state, action) => {
+    switch(action.type) {
+      case "FOO":
+        { ...state, doStuff: action.payload }
+      case "BAR":
+        { ...state, doStuff: action.payload }
+      default:
+        return { ...state };
+    }
+  }
+  const SampleComponent = props => {
+    const [state, dispatch] = useReducer(reducerFn, initialState);
+    const actionFoo = {
+      type: 'foo',
+      payload: 'Try plunging attack!'
+    };
+    const actionBar = {
+      type: 'bar',
+      payload: 'Is this the work of the enemy Stand???'
+    }
+    return (
+      <div
+        { state }
+      >
+        <p>I did some stuff</p>
+        <button onClick={() => dispatch(actionFoo) }>Click me lmao</button>
+        <button onClick={() => dispatch(actionBar) }>Click me lmao</button>
+      </div>
+    )
+  }
+```
+
+`useReducer()` takes in two args, a reducer function, and the initial state for the particular piece of state you're managing. It returns state and a dispatch function to initiate a state change. The dispatch function ends up calling the reducer function, so you'll end up dispatching state changes by passing in actions like in Redux. Said actions look like below, based on the above reducer:
+```js
+  const actionFoo = {
+      type: 'foo',
+      payload: 'Try plunging attack!'
+    };
+```
+
+## Custom hooks
+
+See the [React Docs](https://reactjs.org/docs/hooks-custom.html) on building a custom hook for more.
+
+We can also build our own custom hooks if our state ends up needing to do multiple things(e.g add, delete, update operations). These are literally just functions that can do and provide more state handling for you if your app needs it. It can also perform side effects and subscribe to anything that requires side effects.
+
+Given the below component:
+```js
+function FriendStatus(props) {
+  const [isOnline, setIsOnline] = useState(null);
+
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+
+  if (isOnline === null) {
+    return 'Loading...';
+  }
+  return isOnline ? 'Online' : 'Offline';
+}
+```
+
+But let's say we also have a general contact list component and we want to render online users in green. We could copy the state in the above component and paste it in but that's not great(DRY, and etc).
+```js
+function FriendListItem(props) {
+  const [isOnline, setIsOnline] = useState(null);
+
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+
+  return (
+    <li style={{ color: isOnline ? 'green' : 'black' }}>
+      {props.friend.name}
+    </li>
+  );
+}
+```
+
+React gives us the ability to create our own hooks, which means state handling can be easily shared now. For this portion of the app's state, it'd look like the below:
+```js
+function useFriendStatus(friendID) {
+  const [isOnline, setIsOnline] = useState(null);
+
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
+    };
+  });
+
+  return isOnline;
+}
+
+export default useFriendStatus
+```
+
+First note that our custom hook starts with `use`. React prefers that you start your custom hook with `use` otherwise it can't check your custom hook for any formatting errors and such. We've also moved our side effect handling out and we've returned `isOnline` out for consumption as well.
+
+Note: If we needed to, we can define additional functions to handle state and we can return an object with a bunch of keys instead.
+
+Now that we've done that, our components now look like:
+```js
+function FriendStatus(props) {
+  const isOnline = useFriendStatus(props.friend.id);
+
+  if (isOnline === null) {
+    return 'Loading...';
+  }
+  return isOnline ? 'Online' : 'Offline';
+}
+
+function FriendListItem(props) {
+  const isOnline = useFriendStatus(props.friend.id);
+
+  return (
+    <li style={{ color: isOnline ? 'green' : 'black' }}>
+      {props.friend.name}
+    </li>
+  );
+}
+```
+
+This is a lot slicker than the above and way more reusable. We've also used less lines of code in our component as we can just import the relevant hook instead of writing it all out in the component itself. Groovy!
+
+## Context API and hooks
+
+See the below references/ docs for more:
+- [React Context Docs](https://reactjs.org/docs/context.html#reactcreatecontext)
+- [React `useContext()` doc](https://reactjs.org/docs/hooks-reference.html#usecontext)
+- []
+
+Contexts can be used by pure components using the `useContext()` method. Looks like so:
+```js
+  const initialState = { access_code: 1234, data: 'shoot the flagship' };
+  const SampleContext = React.createContext(initialState);
+
+  const SampleProvider = props => {
+    // Reducer gets initialState passed in
+    const [state, dispatch] = useReducer(reducer, initialState);
+    return (
+      <SampleContext.Provider value={{ state, dispatch }}>
+        { props.children }
+      </SampleContext.Provider>
+    )
+  }
+
+  const SampleComponent = props => {
+    const { state, dispatch, access_code, data } = useContext(SampleContext);
+    doStuffWithState(state);
+    const handleClick = e => dispatch(e);
+    return (
+      <div>
+        I did some stuff
+      </div>
+    )
+  }
+
+  const App = props => {
+    return (
+      <SampleProvider>
+        <SampleComponent/>
+      </SampleProvider>
+    )
+  }
+```
+Note that when we consume the context in our pure component, `SampleComponent`, we use the `useContext()` method and pass in the **entire** `SampleContext` object. Also note that making the context provider into it's own component is a fairly standard design pattern, the above looks cleaner than returning `<SampleContext.Provider>` directly.
